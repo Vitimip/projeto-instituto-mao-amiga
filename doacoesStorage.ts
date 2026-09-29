@@ -1,6 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
- type Doacao = {
+ export type Doacao = {
     id: number;
     tipoItem: string;
     quantidade: number;

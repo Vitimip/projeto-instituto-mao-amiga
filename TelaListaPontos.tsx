@@ -14,6 +14,8 @@ import {
     Keyboard,
     useWindowDimensions,
 } from 'react-native';
+import {RootStackParamList} from "./App";
+import {NativeStackScreenProps} from "@react-navigation/native-stack";
 
 export type Ponto = {
     id: string;
@@ -23,8 +25,7 @@ export type Ponto = {
     recebe_distribui: string;
 };
 
-type Props = {
-    navigation: any;
+type Props = NativeStackScreenProps<RootStackParamList, 'ListaPontos'> & {
     pontos: Ponto[];
     onAdicionarPonto: (ponto: Ponto) => void;
 };
@@ -217,6 +218,14 @@ function TelaListaPontos({
                     >
                         <Text style={styles.botaoSecundarioTexto}>Registrar doação</Text>
                     </TouchableOpacity>
+                    <TouchableOpacity
+                        style={styles.botaoDoacoes}
+                        onPress={() => navigation.navigate('MinhasDoacoes')}
+                    >
+                        <Text style={styles.botaoDoacoesTexto}>
+                            Minhas doações
+                        </Text>
+                    </TouchableOpacity>
                 </View>
 
                 <TextInput
@@ -353,6 +362,18 @@ const styles = StyleSheet.create({
     },
     botaoSecundarioTexto: {
         color: '#1B3A5C',
+        fontWeight: 'bold',
+    },
+    botaoDoacoes: {
+        backgroundColor: '#1B3A5C',
+        borderRadius: 8,
+        paddingVertical: 12,
+        alignItems: 'center',
+        marginBottom: 16,
+    },
+
+    botaoDoacoesTexto: {
+        color: '#FFFFFF',
         fontWeight: 'bold',
     },
 });
