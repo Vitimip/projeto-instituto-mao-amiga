@@ -15,9 +15,11 @@ import { RootStackParamList } from './App';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export type Doacao = {
+    id: number;
     tipoItem: string;
     quantidade: number;
     pontoDestinoId: string;
+    criadoEm: string
 };
 
 const CHAVE_DOACOES = '@doacoes';
@@ -95,11 +97,13 @@ export default function TelaCadastroDoacao({ pontos }: Props) {
             setErro('Selecione um ponto de destino.');
             return;
         }
-
+        
         const novaDoacao: Doacao = {
+            id: Date.now(),
             tipoItem: tipoItem.trim(),
             quantidade: Number(quantidade),
             pontoDestinoId: pontoDestinoId,
+            criadoEm: new Date().toISOString(),
         };
 
         await salvarDoacao(novaDoacao);
@@ -110,7 +114,6 @@ export default function TelaCadastroDoacao({ pontos }: Props) {
         setTipoItem('');
         setQuantidade('');
         setPontoDestinoId(null);
-
         Keyboard.dismiss();
     }
 
@@ -235,6 +238,9 @@ export default function TelaCadastroDoacao({ pontos }: Props) {
 
                         <Text style={styles.ponto}>
                             Ponto: {nomePonto(item.pontoDestinoId)}
+                        </Text>
+                        <Text style={styles.data}>
+    Criado em: {new Date(item.criadoEm).toLocaleString('pt-BR')}
                         </Text>
                     </View>
                 )}
