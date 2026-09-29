@@ -12,17 +12,15 @@ import {
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { Ponto } from './TelaListaPontos';
 import { RootStackParamList } from './App';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import {  listarDoacoes, salvarDoacao } from './doacoesStorage';
 
 export type Doacao = {
     id: number;
     tipoItem: string;
     quantidade: number;
     pontoDestinoId: string;
-    criadoEm: string
+    criadoEm: string;
 };
-
-const CHAVE_DOACOES = '@doacoes';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'CadastroDoacao'> & {
     pontos: Ponto[];
@@ -37,45 +35,17 @@ export default function TelaCadastroDoacao({ pontos }: Props) {
     const [doacoes, setDoacoes] = useState<Doacao[]>([]);
 
     useEffect(() => {
+        async function carregarDoacoes() {
+            try {
+                const doacoesSalvas = await listarDoacoes();
+                setDoacoes(doacoesSalvas);
+            } catch (erro) {
+                console.log('Erro na tela ao carregar:', erro);
+            }
+        }
+
         carregarDoacoes();
     }, []);
-
-    async function salvarDoacao(doacao: Doacao) {
-        try {
-            const dados = await AsyncStorage.getItem(CHAVE_DOACOES);
-
-            const doacoesExistentes: Doacao[] = dados
-                ? JSON.parse(dados)
-                : [];
-
-            const doacoesAtualizadas = [
-                ...doacoesExistentes,
-                doacao,
-            ];
-
-            await AsyncStorage.setItem(
-                CHAVE_DOACOES,
-                JSON.stringify(doacoesAtualizadas)
-            );
-
-            setDoacoes(doacoesAtualizadas);
-        } catch (erro) {
-            console.log('Erro ao salvar doação:', erro);
-        }
-    }
-
-    async function carregarDoacoes() {
-        try {
-            const dados = await AsyncStorage.getItem(CHAVE_DOACOES);
-
-            if (dados) {
-                const doacoesSalvas: Doacao[] = JSON.parse(dados);
-                setDoacoes(doacoesSalvas);
-            }
-        } catch (erro) {
-            console.log('Erro ao carregar doações:', erro);
-        }
-    }
 
     async function validar() {
         setSucesso(false);
@@ -97,7 +67,7 @@ export default function TelaCadastroDoacao({ pontos }: Props) {
             setErro('Selecione um ponto de destino.');
             return;
         }
-        
+
         const novaDoacao: Doacao = {
             id: Date.now(),
             tipoItem: tipoItem.trim(),
@@ -107,6 +77,8 @@ export default function TelaCadastroDoacao({ pontos }: Props) {
         };
 
         await salvarDoacao(novaDoacao);
+        const doacoesAtualizadas = await listarDoacoes();
+        setDoacoes(doacoesAtualizadas);
 
         setErro('');
         setSucesso(true);
@@ -114,6 +86,7 @@ export default function TelaCadastroDoacao({ pontos }: Props) {
         setTipoItem('');
         setQuantidade('');
         setPontoDestinoId(null);
+
         Keyboard.dismiss();
     }
 
@@ -225,7 +198,7 @@ export default function TelaCadastroDoacao({ pontos }: Props) {
 
             <FlatList
                 data={doacoes}
-                keyExtractor={(_, index) => index.toString()}
+                keyExtractor={(item, index) => item.id?.toString() ?? index.toString()}
                 renderItem={({ item }) => (
                     <View style={styles.doacao}>
                         <Text style={styles.tipo}>
@@ -240,7 +213,7 @@ export default function TelaCadastroDoacao({ pontos }: Props) {
                             Ponto: {nomePonto(item.pontoDestinoId)}
                         </Text>
                         <Text style={styles.data}>
-    Criado em: {new Date(item.criadoEm).toLocaleString('pt-BR')}
+                            Criado em: {new Date(item.criadoEm).toLocaleString('pt-BR')}
                         </Text>
                     </View>
                 )}
@@ -340,5 +313,10 @@ const styles = StyleSheet.create({
         borderRadius: 8,
         padding: 12,
         marginBottom: 8,
+    },
+    data: {
+        fontSize: 13,
+        color: '#757575',
+        marginTop: 4,
     },
 });
