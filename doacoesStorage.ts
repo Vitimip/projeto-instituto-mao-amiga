@@ -1,6 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
- export type Doacao = {
+export type Doacao = {
     id: number;
     tipoItem: string;
     quantidade: number;
@@ -40,5 +40,22 @@ export async function salvarDoacao(doacao: Doacao): Promise<void> {
         );
     } catch (erro) {
         console.log('Erro ao salvar doação:', erro);
+    }
+}
+
+export async function excluirDoacao(id: number): Promise<void> {
+    try {
+        const doacoes = await listarDoacoes();
+
+        const doacoesAtualizadas = doacoes.filter(
+            (doacao) => doacao.id !== id
+        );
+
+        await AsyncStorage.setItem(
+            CHAVE_DOACOES,
+            JSON.stringify(doacoesAtualizadas)
+        );
+    } catch (erro) {
+        console.log('Erro ao excluir doação:', erro);
     }
 }
