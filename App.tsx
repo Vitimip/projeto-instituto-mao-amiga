@@ -18,7 +18,12 @@ import { Doacao } from './doacoesStorage';
 export type RootStackParamList = {
     ListaPontos: undefined;
     DetalhePonto: { pontoId: string } | undefined;
-    CadastroDoacao: { pontoId: string } | undefined;
+    CadastroDoacao:
+    | {
+        pontoId?: string;
+        doacao?: Doacao;
+    }
+    | undefined;
     MinhasDoacoes: undefined;
     DetalheDoacao: { doacao: Doacao };
 };
