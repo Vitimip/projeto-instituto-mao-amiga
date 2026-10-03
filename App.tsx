@@ -12,12 +12,15 @@ import TelaListaPontos, {
 import TelaDetalhePonto from './TelaDetalhePonto';
 import TelaCadastroDoacao from './TelaCadastroDoacao';
 import TelaMinhasDoacoes from './TelaMinhasDoacoes';
+import TelaDetalheDoacao from './TelaDetalheDoacao';
+import { Doacao } from './doacoesStorage';
 
 export type RootStackParamList = {
     ListaPontos: undefined;
     DetalhePonto: { pontoId: string } | undefined;
     CadastroDoacao: { pontoId: string } | undefined;
     MinhasDoacoes: undefined;
+    DetalheDoacao: { doacao: Doacao };
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -112,6 +115,14 @@ function App() {
                             />
                         )}
                     </Stack.Screen>
+                    <Stack.Screen name="DetalheDoacao">
+    {(props) => (
+        <TelaDetalheDoacao
+            {...props}
+            pontos={pontos}
+        />
+    )}
+</Stack.Screen>
                 </Stack.Navigator>
             </NavigationContainer>
         </SafeAreaProvider>
