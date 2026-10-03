@@ -94,10 +94,18 @@ export default function TelaMinhasDoacoes({ navigation, pontos }: Props) {
                 data={doacoes}
                 keyExtractor={(item, index) => item.id?.toString() ?? index.toString()}
                 renderItem={({ item }) => (
-                    <ItemDoacaoMemo
-                        doacao={item}
-                        nomePonto={nomePonto(item.pontoDestinoId)}
-                    />
+                    <TouchableOpacity
+                        onPress={() =>
+                            navigation.navigate('DetalheDoacao', {
+                                doacao: item,
+                            })
+                        }
+                    >
+                        <ItemDoacaoMemo
+                            doacao={item}
+                            nomePonto={nomePonto(item.pontoDestinoId)}
+                        />
+                    </TouchableOpacity>
                 )}
                 contentContainerStyle={styles.lista}
             />
