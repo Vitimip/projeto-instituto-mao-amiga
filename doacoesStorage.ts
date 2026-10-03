@@ -43,6 +43,23 @@ export async function salvarDoacao(doacao: Doacao): Promise<void> {
     }
 }
 
+export async function atualizarDoacao(doacao: Doacao): Promise<void> {
+    try {
+        const doacoes = await listarDoacoes();
+
+        const doacoesAtualizadas = doacoes.map((item) =>
+            item.id === doacao.id ? doacao : item
+        );
+
+        await AsyncStorage.setItem(
+            CHAVE_DOACOES,
+            JSON.stringify(doacoesAtualizadas)
+        );
+    } catch (erro) {
+        console.log('Erro ao atualizar doação:', erro);
+    }
+}
+
 export async function excluirDoacao(id: number): Promise<void> {
     try {
         const doacoes = await listarDoacoes();
