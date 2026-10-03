@@ -12,7 +12,11 @@ import {
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { Ponto } from './TelaListaPontos';
 import { RootStackParamList } from './App';
-import {  listarDoacoes, salvarDoacao } from './doacoesStorage';
+import {
+    listarDoacoes,
+    salvarDoacao,
+    atualizarDoacao,
+} from './doacoesStorage';
 
 export type Doacao = {
     id: number;
@@ -26,7 +30,13 @@ type Props = NativeStackScreenProps<RootStackParamList, 'CadastroDoacao'> & {
     pontos: Ponto[];
 };
 
-export default function TelaCadastroDoacao({ pontos }: Props) {
+export default function TelaCadastroDoacao({
+                                               pontos,
+                                               route,
+                                               navigation,
+                                           }: Props) {
+    const doacaoEditando = route.params?.doacao;
+    const modoEdicao = !!doacaoEditando;
     const [tipoItem, setTipoItem] = useState('');
     const [quantidade, setQuantidade] = useState('');
     const [pontoDestinoId, setPontoDestinoId] = useState<string | null>(null);
@@ -35,17 +45,12 @@ export default function TelaCadastroDoacao({ pontos }: Props) {
     const [doacoes, setDoacoes] = useState<Doacao[]>([]);
 
     useEffect(() => {
-        async function carregarDoacoes() {
-            try {
-                const doacoesSalvas = await listarDoacoes();
-                setDoacoes(doacoesSalvas);
-            } catch (erro) {
-                console.log('Erro na tela ao carregar:', erro);
-            }
+        if (doacaoEditando) {
+            setTipoItem(doacaoEditando.tipoItem);
+            setQuantidade(doacaoEditando.quantidade.toString());
+            setPontoDestinoId(doacaoEditando.pontoDestinoId);
         }
-
-        carregarDoacoes();
-    }, []);
+    }, [doacaoEditando]);
 
     async function validar() {
         setSucesso(false);
@@ -69,16 +74,20 @@ export default function TelaCadastroDoacao({ pontos }: Props) {
         }
 
         const novaDoacao: Doacao = {
-            id: Date.now(),
+            id: doacaoEditando?.id ?? Date.now(),
             tipoItem: tipoItem.trim(),
             quantidade: Number(quantidade),
             pontoDestinoId: pontoDestinoId,
-            criadoEm: new Date().toISOString(),
+            criadoEm: doacaoEditando?.criadoEm ?? new Date().toISOString(),
         };
 
+        if (modoEdicao) {
+            await atualizarDoacao(novaDoacao);
+            navigation.goBack();
+            return;
+        }
+
         await salvarDoacao(novaDoacao);
-        const doacoesAtualizadas = await listarDoacoes();
-        setDoacoes(doacoesAtualizadas);
 
         setErro('');
         setSucesso(true);
@@ -97,7 +106,7 @@ export default function TelaCadastroDoacao({ pontos }: Props) {
     return (
         <SafeAreaView style={styles.container}>
             <Text style={styles.titulo}>
-                Registrar doação
+                {modoEdicao ? 'Editar doação' : 'Registrar doação'}
             </Text>
 
             <Text style={styles.rotulo}>
@@ -188,7 +197,15 @@ export default function TelaCadastroDoacao({ pontos }: Props) {
                 onPress={validar}
             >
                 <Text style={styles.botaoTexto}>
-                    Registrar doação
+                    {modoEdicao ? 'Salvar alterações' : 'Registrar doação'}
+                </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+                style={styles.botaoCancelar}
+                onPress={() => navigation.goBack()}
+            >
+                <Text style={styles.botaoCancelarTexto}>
+                    Cancelar
                 </Text>
             </TouchableOpacity>
 
@@ -318,5 +335,18 @@ const styles = StyleSheet.create({
         fontSize: 13,
         color: '#757575',
         marginTop: 4,
+    },
+    botaoCancelar: {
+        borderWidth: 1,
+        borderColor: '#1B3A5C',
+        borderRadius: 8,
+        paddingVertical: 12,
+        alignItems: 'center',
+        marginTop: 8,
+    },
+
+    botaoCancelarTexto: {
+        color: '#1B3A5C',
+        fontWeight: 'bold',
     },
 });
