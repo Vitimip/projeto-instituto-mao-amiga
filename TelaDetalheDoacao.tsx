@@ -19,10 +19,10 @@ type Props = NativeStackScreenProps<
 };
 
 export default function TelaDetalheDoacao({
-    navigation,
-    route,
-    pontos,
-}: Props) {
+                                              navigation,
+                                              route,
+                                              pontos,
+                                          }: Props) {
     const doacao = route.params.doacao;
 
     const ponto = pontos.find(
@@ -89,7 +89,18 @@ export default function TelaDetalheDoacao({
                     {new Date(doacao.criadoEm).toLocaleString('pt-BR')}
                 </Text>
             </View>
-
+            <TouchableOpacity
+                style={styles.botaoEditar}
+                onPress={() =>
+                    navigation.navigate('CadastroDoacao', {
+                        doacao: doacao,
+                    })
+                }
+            >
+                <Text style={styles.botaoEditarTexto}>
+                    Editar doação
+                </Text>
+            </TouchableOpacity>
             <TouchableOpacity
                 style={styles.botaoExcluir}
                 onPress={excluir}
@@ -135,9 +146,21 @@ const styles = StyleSheet.create({
         borderRadius: 8,
         paddingVertical: 12,
         alignItems: 'center',
-        marginTop: 20,
+        marginTop: 8,
     },
     botaoExcluirTexto: {
+        color: '#FFFFFF',
+        fontWeight: 'bold',
+    },
+    botaoEditar: {
+        backgroundColor: '#1B3A5C',
+        borderRadius: 8,
+        paddingVertical: 12,
+        alignItems: 'center',
+        marginTop: 20,
+    },
+
+    botaoEditarTexto: {
         color: '#FFFFFF',
         fontWeight: 'bold',
     },
