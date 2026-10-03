@@ -19,17 +19,17 @@ type Props = NativeStackScreenProps<
 };
 
 export default function TelaDetalheDoacao({
-                                              navigation,
-                                              route,
-                                              pontos,
-                                          }: Props) {
-    const { doacao } = route.params;
+    navigation,
+    route,
+    pontos,
+}: Props) {
+    const doacao = route.params.doacao;
 
     const ponto = pontos.find(
         (item) => item.id === doacao.pontoDestinoId
     );
 
-    function confirmarExclusao() {
+    function excluir() {
         Alert.alert(
             'Excluir doação',
             'Tem certeza que deseja excluir esta doação?',
@@ -78,7 +78,7 @@ export default function TelaDetalheDoacao({
                 </Text>
 
                 <Text style={styles.valor}>
-                    {ponto?.nome ?? doacao.pontoDestinoId}
+                    {ponto?.nome ?? 'Ponto não encontrado'}
                 </Text>
 
                 <Text style={styles.rotulo}>
@@ -92,7 +92,7 @@ export default function TelaDetalheDoacao({
 
             <TouchableOpacity
                 style={styles.botaoExcluir}
-                onPress={confirmarExclusao}
+                onPress={excluir}
             >
                 <Text style={styles.botaoExcluirTexto}>
                     Excluir doação
