@@ -1,8 +1,11 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import {
+    KeyboardAvoidingView,
+    Platform,
     SafeAreaView,
     StyleSheet,
     Text,
+    TextInput,
     TouchableOpacity,
     View,
     FlatList,
@@ -43,6 +46,7 @@ const ItemDoacaoMemo = React.memo(ItemDoacao);
 
 export default function TelaMinhasDoacoes({ navigation, pontos }: Props) {
     const [doacoes, setDoacoes] = useState<Doacao[]>([]);
+    const [busca, setBusca] = useState('');
 
     const carregarDoacoes = useCallback(async () => {
         const doacoesSalvas = await listarDoacoes();
@@ -54,6 +58,18 @@ export default function TelaMinhasDoacoes({ navigation, pontos }: Props) {
             carregarDoacoes();
         }, [carregarDoacoes])
     );
+
+    const doacoesFiltradas = useMemo(() => {
+        const textoBusca = busca.trim().toLowerCase();
+
+        if (!textoBusca) {
+            return doacoes;
+        }
+
+        return doacoes.filter((doacao) =>
+            doacao.tipoItem.toLowerCase().includes(textoBusca)
+        );
+    }, [doacoes, busca]);
 
     function nomePonto(id: string) {
         return pontos.find((ponto) => ponto.id === id)?.nome ?? 'Ponto não encontrado';
@@ -86,29 +102,54 @@ export default function TelaMinhasDoacoes({ navigation, pontos }: Props) {
 
     return (
         <SafeAreaView style={styles.container}>
-            <Text style={styles.titulo}>
-                Minhas doações
-            </Text>
+            <KeyboardAvoidingView
+                style={styles.teclado}
+                behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+            >
+                <Text style={styles.titulo}>
+                    Minhas doações
+                </Text>
 
-            <FlatList
-                data={doacoes}
-                keyExtractor={(item, index) => item.id?.toString() ?? index.toString()}
-                renderItem={({ item }) => (
-                    <TouchableOpacity
-                        onPress={() =>
-                            navigation.navigate('DetalheDoacao', {
-                                doacao: item,
-                            })
+                <TextInput
+                    style={styles.campoBusca}
+                    value={busca}
+                    onChangeText={setBusca}
+                    placeholder="Buscar por tipo de item"
+                    placeholderTextColor="#757575"
+                    returnKeyType="search"
+                />
+
+                {doacoesFiltradas.length === 0 ? (
+                    <View style={styles.vazioBusca}>
+                        <Text style={styles.mensagem}>
+                            Nenhuma doação encontrada para "{busca}".
+                        </Text>
+                    </View>
+                ) : (
+                    <FlatList
+                        data={doacoesFiltradas}
+                        keyExtractor={(item, index) =>
+                            item.id?.toString() ?? index.toString()
                         }
-                    >
-                        <ItemDoacaoMemo
-                            doacao={item}
-                            nomePonto={nomePonto(item.pontoDestinoId)}
-                        />
-                    </TouchableOpacity>
+                        keyboardShouldPersistTaps="handled"
+                        renderItem={({ item }) => (
+                            <TouchableOpacity
+                                onPress={() =>
+                                    navigation.navigate('DetalheDoacao', {
+                                        doacao: item,
+                                    })
+                                }
+                            >
+                                <ItemDoacaoMemo
+                                    doacao={item}
+                                    nomePonto={nomePonto(item.pontoDestinoId)}
+                                />
+                            </TouchableOpacity>
+                        )}
+                        contentContainerStyle={styles.lista}
+                    />
                 )}
-                contentContainerStyle={styles.lista}
-            />
+            </KeyboardAvoidingView>
         </SafeAreaView>
     );
 }
@@ -119,11 +160,24 @@ const styles = StyleSheet.create({
         padding: 16,
         backgroundColor: '#FFFFFF',
     },
+    teclado: {
+        flex: 1,
+    },
     titulo: {
         fontSize: 18,
         fontWeight: 'bold',
         color: '#1B3A5C',
-        marginBottom: 16,
+        marginBottom: 12,
+    },
+    campoBusca: {
+        height: 48,
+        borderWidth: 1,
+        borderColor: '#BDBDBD',
+        borderRadius: 8,
+        paddingHorizontal: 12,
+        fontSize: 16,
+        color: '#222222',
+        marginBottom: 12,
     },
     lista: {
         paddingBottom: 16,
@@ -159,6 +213,12 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         paddingHorizontal: 20,
     },
+    vazioBusca: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        paddingHorizontal: 20,
+    },
     mensagem: {
         fontSize: 16,
         color: '#757575',
@@ -177,3 +237,4 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
     },
 });
+
