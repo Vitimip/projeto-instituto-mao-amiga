@@ -20,6 +20,12 @@ type Props = NativeStackScreenProps<RootStackParamList, 'MinhasDoacoes'> & {
     pontos: Ponto[];
 };
 
+type ResumoDoacao = {
+    tipoItem: string;
+    quantidade: number;
+    quantidadeDoacoes: number;
+};
+
 const ItemDoacao = ({ doacao, nomePonto }: { doacao: Doacao; nomePonto: string }) => {
     return (
         <View style={styles.doacao}>
@@ -71,6 +77,30 @@ export default function TelaMinhasDoacoes({ navigation, pontos }: Props) {
         );
     }, [doacoes, busca]);
 
+    const resumoDoacoes = useMemo<ResumoDoacao[]>(() => {
+        const resumo = new Map<string, ResumoDoacao>();
+
+        doacoes.forEach((doacao) => {
+            const chave = doacao.tipoItem.trim().toLowerCase();
+            const tipoExistente = resumo.get(chave);
+
+            if (tipoExistente) {
+                tipoExistente.quantidade += doacao.quantidade;
+                tipoExistente.quantidadeDoacoes += 1;
+            } else {
+                resumo.set(chave, {
+                    tipoItem: doacao.tipoItem.trim(),
+                    quantidade: doacao.quantidade,
+                    quantidadeDoacoes: 1,
+                });
+            }
+        });
+
+        return Array.from(resumo.values()).sort(
+            (a, b) => b.quantidade - a.quantidade
+        );
+    }, [doacoes]);
+
     function nomePonto(id: string) {
         return pontos.find((ponto) => ponto.id === id)?.nome ?? 'Ponto não encontrado';
     }
@@ -81,6 +111,16 @@ export default function TelaMinhasDoacoes({ navigation, pontos }: Props) {
                 <Text style={styles.titulo}>
                     Minhas doações
                 </Text>
+
+                <View style={styles.resumoVazio}>
+                    <Text style={styles.resumoTitulo}>
+                        Resumo das doações
+                    </Text>
+
+                    <Text style={styles.mensagem}>
+                        Nenhuma doação registrada ainda.
+                    </Text>
+                </View>
 
                 <View style={styles.vazio}>
                     <Text style={styles.mensagem}>
@@ -118,6 +158,25 @@ export default function TelaMinhasDoacoes({ navigation, pontos }: Props) {
                     placeholderTextColor="#757575"
                     returnKeyType="search"
                 />
+
+                <View style={styles.resumo}>
+                    <Text style={styles.resumoTitulo}>
+                        Resumo das doações
+                    </Text>
+
+                    <Text style={styles.totalDoacoes}>
+                        Total de doações: {doacoes.length}
+                    </Text>
+
+                    {resumoDoacoes.map((item) => (
+                        <Text
+                            key={item.tipoItem.toLowerCase()}
+                            style={styles.itemResumo}
+                        >
+                            {item.tipoItem}: {item.quantidade} unidades em {item.quantidadeDoacoes} doações
+                        </Text>
+                    ))}
+                </View>
 
                 {doacoesFiltradas.length === 0 ? (
                     <View style={styles.vazioBusca}>
@@ -179,6 +238,37 @@ const styles = StyleSheet.create({
         color: '#222222',
         marginBottom: 12,
     },
+    resumo: {
+        borderWidth: 1,
+        borderColor: '#E0E0E0',
+        borderRadius: 8,
+        padding: 12,
+        marginBottom: 12,
+        backgroundColor: '#F8F9FA',
+    },
+    resumoVazio: {
+        borderWidth: 1,
+        borderColor: '#E0E0E0',
+        borderRadius: 8,
+        padding: 12,
+        marginBottom: 16,
+        backgroundColor: '#F8F9FA',
+    },
+    resumoTitulo: {
+        fontSize: 16,
+        fontWeight: 'bold',
+        color: '#1B3A5C',
+        marginBottom: 8,
+    },
+    totalDoacoes: {
+        fontSize: 14,
+        fontWeight: '600',
+        marginBottom: 6,
+    },
+    itemResumo: {
+        fontSize: 14,
+        marginTop: 4,
+    },
     lista: {
         paddingBottom: 16,
     },
@@ -237,4 +327,5 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
     },
 });
+
 
