@@ -1,5 +1,6 @@
 import {
     Alert,
+    Platform,
     SafeAreaView,
     StyleSheet,
     Text,
@@ -19,17 +20,31 @@ type Props = NativeStackScreenProps<
 };
 
 export default function TelaDetalheDoacao({
-                                              navigation,
-                                              route,
-                                              pontos,
-                                          }: Props) {
+    navigation,
+    route,
+    pontos,
+}: Props) {
     const doacao = route.params.doacao;
 
     const ponto = pontos.find(
         (item) => item.id === doacao.pontoDestinoId
     );
 
-    function excluir() {
+    async function confirmarExclusao() {
+        if (Platform.OS === 'web') {
+            const confirmou = window.confirm(
+                'Tem certeza que deseja excluir esta doação?'
+            );
+
+            if (!confirmou) {
+                return;
+            }
+
+            await excluirDoacao(doacao.id);
+            navigation.goBack();
+            return;
+        }
+
         Alert.alert(
             'Excluir doação',
             'Tem certeza que deseja excluir esta doação?',
@@ -48,6 +63,12 @@ export default function TelaDetalheDoacao({
                 },
             ]
         );
+    }
+
+    function editar() {
+        navigation.navigate('CadastroDoacao', {
+            doacao: doacao,
+        });
     }
 
     return (
@@ -89,21 +110,21 @@ export default function TelaDetalheDoacao({
                     {new Date(doacao.criadoEm).toLocaleString('pt-BR')}
                 </Text>
             </View>
+
             <TouchableOpacity
                 style={styles.botaoEditar}
-                onPress={() =>
-                    navigation.navigate('CadastroDoacao', {
-                        doacao: doacao,
-                    })
-                }
+                onPress={editar}
+                activeOpacity={0.7}
             >
                 <Text style={styles.botaoEditarTexto}>
                     Editar doação
                 </Text>
             </TouchableOpacity>
+
             <TouchableOpacity
                 style={styles.botaoExcluir}
-                onPress={excluir}
+                onPress={confirmarExclusao}
+                activeOpacity={0.7}
             >
                 <Text style={styles.botaoExcluirTexto}>
                     Excluir doação
@@ -141,19 +162,6 @@ const styles = StyleSheet.create({
         fontSize: 16,
         color: '#222222',
     },
-    botaoExcluir: {
-        backgroundColor: '#C62828',
-        borderRadius: 8,
-        minHeight: 44,
-        paddingHorizontal: 12,
-        alignItems: 'center',
-        justifyContent: 'center',
-        marginTop: 8,
-    },
-    botaoExcluirTexto: {
-        color: '#FFFFFF',
-        fontWeight: 'bold',
-    },
     botaoEditar: {
         backgroundColor: '#1B3A5C',
         borderRadius: 8,
@@ -162,9 +170,23 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
         marginTop: 20,
+        cursor: 'pointer',
     },
-
     botaoEditarTexto: {
+        color: '#FFFFFF',
+        fontWeight: 'bold',
+    },
+    botaoExcluir: {
+        backgroundColor: '#C62828',
+        borderRadius: 8,
+        minHeight: 44,
+        paddingHorizontal: 12,
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginTop: 8,
+        cursor: 'pointer',
+    },
+    botaoExcluirTexto: {
         color: '#FFFFFF',
         fontWeight: 'bold',
     },
