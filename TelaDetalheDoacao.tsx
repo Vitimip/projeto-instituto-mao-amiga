@@ -144,8 +144,10 @@ const styles = StyleSheet.create({
     botaoExcluir: {
         backgroundColor: '#C62828',
         borderRadius: 8,
-        paddingVertical: 12,
+        minHeight: 44,
+        paddingHorizontal: 12,
         alignItems: 'center',
+        justifyContent: 'center',
         marginTop: 8,
     },
     botaoExcluirTexto: {
@@ -155,8 +157,10 @@ const styles = StyleSheet.create({
     botaoEditar: {
         backgroundColor: '#1B3A5C',
         borderRadius: 8,
-        paddingVertical: 12,
+        minHeight: 44,
+        paddingHorizontal: 12,
         alignItems: 'center',
+        justifyContent: 'center',
         marginTop: 20,
     },
 
