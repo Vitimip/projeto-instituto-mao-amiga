@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import {
     Keyboard,
+    KeyboardAvoidingView,
+    Platform,
     SafeAreaView,
     StyleSheet,
     Text,
@@ -105,6 +107,10 @@ export default function TelaCadastroDoacao({
 
     return (
         <SafeAreaView style={styles.container}>
+            <KeyboardAvoidingView
+                style={styles.teclado}
+                behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+            >
             <Text style={styles.titulo}>
                 {modoEdicao ? 'Editar doação' : 'Registrar doação'}
             </Text>
@@ -235,6 +241,7 @@ export default function TelaCadastroDoacao({
                     </View>
                 )}
             />
+            </KeyboardAvoidingView>
         </SafeAreaView>
     );
 }
@@ -242,8 +249,11 @@ export default function TelaCadastroDoacao({
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        padding: 16,
         backgroundColor: '#FFFFFF',
+    },
+    teclado: {
+        flex: 1,
+        padding: 16,
     },
     titulo: {
         fontSize: 18,
@@ -280,8 +290,10 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         borderColor: '#E0E0E0',
         borderRadius: 20,
+        minHeight: 44,
         paddingHorizontal: 14,
-        paddingVertical: 8,
+        alignItems: 'center',
+        justifyContent: 'center',
     },
     chipPontoSelecionado: {
         backgroundColor: '#1B3A5C',
@@ -304,8 +316,10 @@ const styles = StyleSheet.create({
     botao: {
         backgroundColor: '#1B3A5C',
         borderRadius: 8,
-        paddingVertical: 12,
+        minHeight: 44,
+        paddingHorizontal: 12,
         alignItems: 'center',
+        justifyContent: 'center',
         marginTop: 16,
     },
     botaoTexto: {
@@ -340,8 +354,10 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         borderColor: '#1B3A5C',
         borderRadius: 8,
-        paddingVertical: 12,
+        minHeight: 44,
+        paddingHorizontal: 12,
         alignItems: 'center',
+        justifyContent: 'center',
         marginTop: 8,
     },
 
